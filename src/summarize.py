@@ -1,4 +1,4 @@
-"""Summarize article abstracts using the Anthropic API."""
+"""Summarize article abstracts using the OpenAI API."""
 import os
 
 _SYSTEM_PROMPT = (
@@ -11,23 +11,25 @@ _SYSTEM_PROMPT = (
 
 def summarize_article(article, model):
     """Return a short summary string for one article dict, or the raw abstract if no API key is set."""
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:
         return article["abstract"]
 
-    from anthropic import Anthropic
+    from openai import OpenAI
 
-    client = Anthropic(api_key=api_key)
+    client = OpenAI(api_key=api_key)
     user_content = f"Title: {article['title']}\n\nAbstract:\n{article['abstract']}"
 
     try:
-        response = client.messages.create(
+        response = client.chat.completions.create(
             model=model,
             max_tokens=300,
-            system=_SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": user_content}],
+            messages=[
+                {"role": "system", "content": _SYSTEM_PROMPT},
+                {"role": "user", "content": user_content},
+            ],
         )
-        return response.content[0].text.strip()
+        return response.choices[0].message.content.strip()
     except Exception as exc:  # noqa: BLE001 - fall back rather than fail the whole digest
         return f"(summary unavailable: {exc})\n\n{article['abstract']}"
 

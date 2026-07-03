@@ -4,5 +4,5 @@ journals:
 
 days_back: 1
 max_results_per_journal: 20
-model: "claude-sonnet-5"
+model: "gpt-4o-mini"
 recipient_env: "RECIPIENT_EMAIL"

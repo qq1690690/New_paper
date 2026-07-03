@@ -3,7 +3,7 @@
 CID and the lancet infectious disease new paper
 
 Daily email digest of new articles from *The Lancet Infectious Diseases* and
-*Clinical Infectious Diseases*, summarized with Claude. Runs automatically via
+*Clinical Infectious Diseases*, summarized with OpenAI. Runs automatically via
 GitHub Actions.
 
 ## How it works
@@ -13,8 +13,8 @@ GitHub Actions.
    `days_back` days.
 2. `src/state.py` filters out articles already emailed (tracked in
    `data/seen_ids.json`).
-3. `src/summarize.py` sends each new abstract to the Claude API for a short
-   plain-language summary. If `ANTHROPIC_API_KEY` isn't set, it falls back to
+3. `src/summarize.py` sends each new abstract to the OpenAI API for a short
+   plain-language summary. If `OPENAI_API_KEY` isn't set, it falls back to
    the raw abstract.
 4. `src/email_digest.py` builds an HTML digest and sends it via Gmail SMTP.
 5. `.github/workflows/daily-digest.yml` runs this daily at 12:00 UTC (and on
@@ -38,12 +38,12 @@ Regular Gmail passwords won't work for SMTP. You need an **App Password**:
 2. Go to https://myaccount.google.com/apppasswords
 3. Create an app password (name it e.g. "developer-desk"), copy the 16-character code.
 
-### 3. Get an Anthropic API key (optional but recommended)
+### 3. Get an OpenAI API key (optional but recommended)
 
-1. Go to https://console.anthropic.com/
-2. Create an API key under Settings → API Keys.
+1. Go to https://platform.openai.com/api-keys
+2. Create a new secret key.
 3. Without this, the digest still works but emails the raw PubMed abstract
-   instead of a Claude-generated summary.
+   instead of an OpenAI-generated summary.
 
 ### 4. Add GitHub repo secrets
 
@@ -51,7 +51,7 @@ In your GitHub repo: **Settings → Secrets and variables → Actions → New re
 
 | Secret name          | Value                                   |
 |-----------------------|------------------------------------------|
-| `ANTHROPIC_API_KEY`   | Your Anthropic API key (optional)        |
+| `OPENAI_API_KEY`      | Your OpenAI API key (optional)           |
 | `GMAIL_ADDRESS`       | The Gmail address you'll send from       |
 | `GMAIL_APP_PASSWORD`  | The 16-character app password from step 2|
 | `RECIPIENT_EMAIL`     | Where the digest should be sent          |
@@ -65,7 +65,7 @@ In your GitHub repo: **Settings → Secrets and variables → Actions → New re
 ## Customizing
 
 - Edit `config.yaml` to change journals, lookback window, result cap, or the
-  Claude model used.
+  OpenAI model used.
 - Edit the cron schedule in `.github/workflows/daily-digest.yml` to change
   the time of day (cron times are in UTC).
 
