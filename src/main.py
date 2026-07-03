@@ -22,6 +22,8 @@ def load_config():
 
 def require_env(name):
     value = os.environ.get(name)
+    if value:
+        value = value.strip()
     if not value:
         raise SystemExit(f"Missing required environment variable: {name}")
     return value
@@ -32,7 +34,7 @@ def main():
 
     sender = require_env("GMAIL_ADDRESS")
     app_password = require_env("GMAIL_APP_PASSWORD")
-    recipient = os.environ.get(config.get("recipient_env", "RECIPIENT_EMAIL")) or sender
+    recipient = (os.environ.get(config.get("recipient_env", "RECIPIENT_EMAIL")) or sender).strip()
 
     seen_ids = load_seen_ids(STATE_PATH)
 
