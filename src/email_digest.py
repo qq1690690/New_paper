@@ -3,6 +3,24 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+_SECTION_LABELS = (
+    ("introduction", "Introduction"),
+    ("methods", "Methods"),
+    ("results", "Results"),
+    ("discussion", "Discussion"),
+    ("conclusion", "Conclusion"),
+)
+
+
+def _build_sections_html(article_sections):
+    parts = []
+    for key, label in _SECTION_LABELS:
+        text = article_sections.get(key)
+        if not text:
+            continue
+        parts.append(f'<p style="margin:0 0 4px;"><strong>{label}:</strong> {text}</p>')
+    return "".join(parts)
+
 
 def build_html(articles):
     if not articles:
@@ -18,7 +36,7 @@ def build_html(articles):
             <div style="margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid #ddd;">
                 <h3 style="margin:0 0 4px;"><a href="{article['link']}">{article['title']}</a></h3>
                 <p style="margin:0 0 4px;color:#555;font-size:13px;">{article['journal']} &mdash; {authors}</p>
-                <p style="margin:0;">{article['summary']}</p>
+                {_build_sections_html(article["sections"])}
             </div>
             """
         )

@@ -1,3 +1,5 @@
 requests==2.32.3
 PyYAML==6.0.2
 openai==1.57.0
+gspread==6.1.4
+google-auth==2.35.0

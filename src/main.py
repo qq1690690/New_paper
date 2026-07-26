@@ -8,6 +8,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 
 from email_digest import send_digest
 from fetch_papers import fetch_recent_articles
+from sheets_output import append_articles
 from state import load_seen_ids, save_seen_ids
 from summarize import summarize_articles
 
@@ -49,6 +50,11 @@ def main():
 
     summarize_articles(new_articles, config["model"])
     send_digest(recipient, sender, app_password, new_articles)
+
+    try:
+        append_articles(new_articles)
+    except Exception as exc:  # noqa: BLE001 - sheet failures must not affect the email path or seen_ids
+        print(f"Warning: failed to append articles to Google Sheet: {exc}")
 
     seen_ids.update(a["pmid"] for a in new_articles)
     save_seen_ids(STATE_PATH, seen_ids)
