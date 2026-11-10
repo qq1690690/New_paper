@@ -40,7 +40,10 @@ def main():
     seen_ids = load_seen_ids(STATE_PATH)
 
     articles = fetch_recent_articles(
-        config["journals"], config["days_back"], config["max_results_per_journal"]
+        config["journals"],
+        config.get("topic_journal_groups", []),
+        config["days_back"],
+        config["max_results_per_journal"],
     )
     new_articles = [a for a in articles if a["pmid"] not in seen_ids]
 

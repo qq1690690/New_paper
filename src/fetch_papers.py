@@ -24,6 +24,24 @@ def search_journal(journal, days_back, max_results):
     return resp.json().get("esearchresult", {}).get("idlist", [])
 
 
+def search_topic_group(journals, topic, days_back, max_results):
+    """Return PMIDs published in any of `journals` and matching `topic` within the last `days_back` days."""
+    journal_term = " OR ".join(f'"{journal}"[Journal]' for journal in journals)
+    term = f"({journal_term}) AND {topic}"
+    params = {
+        "db": "pubmed",
+        "term": term,
+        "retmax": max_results,
+        "datetype": "pdat",
+        "reldate": days_back,
+        "retmode": "json",
+        "sort": "most recent",
+    }
+    resp = requests.get(ESEARCH_URL, params=params, timeout=30)
+    resp.raise_for_status()
+    return resp.json().get("esearchresult", {}).get("idlist", [])
+
+
 def fetch_details(pmids):
     """Fetch title/abstract/authors/doi/link for a list of PMIDs."""
     if not pmids:
@@ -85,12 +103,18 @@ def fetch_details(pmids):
     return articles
 
 
-def fetch_recent_articles(journals, days_back, max_results):
-    """Search each journal and return de-duplicated article details keyed by PMID."""
+def fetch_recent_articles(journals, topic_journal_groups, days_back, max_results):
+    """Search each journal and topic/journal-group, and return de-duplicated article details keyed by PMID."""
     all_pmids = []
     seen = set()
     for journal in journals:
         for pmid in search_journal(journal, days_back, max_results):
+            if pmid not in seen:
+                seen.add(pmid)
+                all_pmids.append(pmid)
+
+    for group in topic_journal_groups:
+        for pmid in search_topic_group(group["journals"], group["topic"], days_back, max_results):
             if pmid not in seen:
                 seen.add(pmid)
                 all_pmids.append(pmid)

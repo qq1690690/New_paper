@@ -2,15 +2,22 @@
 
 CID and the lancet infectious disease new paper
 
-Daily email digest of new articles from *The Lancet Infectious Diseases* and
-*Clinical Infectious Diseases*, summarized with OpenAI, with each summary also
-logged as a row in a Google Sheet. Runs automatically via GitHub Actions.
+Daily email digest of new articles from *The Lancet Infectious Diseases*,
+*Clinical Infectious Diseases*, *Clinical Microbiology and Infection*, and the
+JAMA Network's "Infectious Diseases" collection (JAMA and its sibling
+journals, filtered to infection-related articles), summarized with OpenAI,
+with each summary also logged as a row in a Google Sheet. Runs automatically
+via GitHub Actions.
 
 ## How it works
 
 1. `src/fetch_papers.py` queries the PubMed E-utilities API for articles
-   published in the configured journals (`config.yaml`) within the last
-   `days_back` days.
+   published in the configured journals (`config.yaml`'s `journals` list)
+   within the last `days_back` days. It also runs any `topic_journal_groups`
+   entries, which match articles that are both in one of a group's journals
+   AND match its `topic` term — used for JAMA Network, which spreads
+   infectious-disease content across many journals rather than having one
+   dedicated journal.
 2. `src/state.py` filters out articles already emailed (tracked in
    `data/seen_ids.json`).
 3. `src/summarize.py` sends each new abstract to the OpenAI API and gets back

@@ -1,6 +1,30 @@
 journals:
   - "Lancet Infect Dis"
   - "Clin Infect Dis"
+  - "Clin Microbiol Infect"
+
+# Cross-journal topic searches: PMIDs must be in one of `journals` AND match
+# `topic`. Used for JAMA Network, which has no single infectious-disease
+# journal but curates one as a topic collection across its journals:
+# https://jamanetwork.com/collections/5702/infectious-diseases
+topic_journal_groups:
+  - name: "JAMA Network - Infectious Diseases"
+    journals:
+      - "JAMA"
+      - "JAMA Intern Med"
+      - "JAMA Netw Open"
+      - "JAMA Pediatr"
+      - "JAMA Surg"
+      - "JAMA Neurol"
+      - "JAMA Psychiatry"
+      - "JAMA Oncol"
+      - "JAMA Cardiol"
+      - "JAMA Dermatol"
+      - "JAMA Ophthalmol"
+      - "JAMA Otolaryngol Head Neck Surg"
+      - "JAMA Health Forum"
+      - "JAMA Facial Plast Surg"
+    topic: '("Communicable Diseases"[MeSH Terms] OR infection[Title/Abstract] OR infectious[Title/Abstract] OR infections[Title/Abstract])'
 
 days_back: 1
 max_results_per_journal: 20
