@@ -1,10 +1,36 @@
 """Query PubMed E-utilities for recent articles in configured journals."""
+import os
+import time
 import xml.etree.ElementTree as ET
 
 import requests
 
 ESEARCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
 EFETCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
+
+# NCBI caps anonymous requests at 3/sec (10/sec with an API key) and returns
+# 429 when a shared CI runner's IP has already used up that budget; stay well
+# under it and retry with backoff instead of failing the whole run.
+_MIN_REQUEST_INTERVAL = 0.4
+_MAX_RETRIES = 5
+
+
+def _get(url, params):
+    """GET an E-utilities endpoint, adding the API key (if set) and retrying on 429."""
+    if api_key := os.environ.get("NCBI_API_KEY"):
+        params = {**params, "api_key": api_key}
+
+    for attempt in range(_MAX_RETRIES):
+        resp = requests.get(url, params=params, timeout=30)
+        if resp.status_code != 429:
+            resp.raise_for_status()
+            time.sleep(_MIN_REQUEST_INTERVAL)
+            return resp
+        wait = float(resp.headers.get("Retry-After", 2**attempt))
+        time.sleep(wait)
+
+    resp.raise_for_status()
+    return resp
 
 
 def search_journal(journal, days_back, max_results):
@@ -19,8 +45,7 @@ def search_journal(journal, days_back, max_results):
         "retmode": "json",
         "sort": "most recent",
     }
-    resp = requests.get(ESEARCH_URL, params=params, timeout=30)
-    resp.raise_for_status()
+    resp = _get(ESEARCH_URL, params)
     return resp.json().get("esearchresult", {}).get("idlist", [])
 
 
@@ -37,8 +62,7 @@ def search_topic_group(journals, topic, days_back, max_results):
         "retmode": "json",
         "sort": "most recent",
     }
-    resp = requests.get(ESEARCH_URL, params=params, timeout=30)
-    resp.raise_for_status()
+    resp = _get(ESEARCH_URL, params)
     return resp.json().get("esearchresult", {}).get("idlist", [])
 
 
@@ -53,8 +77,7 @@ def fetch_details(pmids):
         "rettype": "abstract",
         "retmode": "xml",
     }
-    resp = requests.get(EFETCH_URL, params=params, timeout=30)
-    resp.raise_for_status()
+    resp = _get(EFETCH_URL, params)
 
     root = ET.fromstring(resp.content)
     articles = []

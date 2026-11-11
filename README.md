@@ -89,6 +89,7 @@ In your GitHub repo: **Settings → Secrets and variables → Actions → New re
 
 | Secret name                   | Value                                          |
 |--------------------------------|------------------------------------------------|
+| `NCBI_API_KEY`                 | PubMed API key from [account settings](https://www.ncbi.nlm.nih.gov/account/settings/) (optional, but raises the rate limit from 3 to 10 req/s and helps avoid 429s on shared CI IPs) |
 | `OPENAI_API_KEY`               | Your OpenAI API key (optional)                  |
 | `GMAIL_ADDRESS`                | The Gmail address you'll send from              |
 | `GMAIL_APP_PASSWORD`           | The 16-character app password from step 2       |
